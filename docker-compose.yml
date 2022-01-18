@@ -1,0 +1,22 @@
+version: "3.9"
+services:
+  app:
+    # image: ruby
+    build: .
+    volumes:
+    - ./:/app
+    ports:
+    - "3000:3000"
+    command: tail -f /dev/null
+    environment:
+      - DATABASE_URL=postgres://username:password@postgres:5432/dbname
+  postgres:
+    image: postgres
+    volumes:
+      - postgres
+    environment:
+      - POSTGRES_USER=username
+      - POSTGRES_PASSWORD=password
+
+volumes:
+  postgres: {}
