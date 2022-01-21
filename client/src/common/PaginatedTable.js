@@ -16,6 +16,7 @@ import { Grid, TableCell, Typography } from "@material-ui/core";
 import { NUM_ROWS_PER_PAGE_CHOICES } from "../constants/table";
 import { useTableStyles } from "../styles/table";
 
+
 function TablePaginationActions(props) {
   const { paginationRoot, paginationIconButton } = useTableStyles();
   const { count, page, rowsPerPage, onChangePage } = props;
@@ -74,6 +75,8 @@ function TablePaginationActions(props) {
   );
 }
 
+
+
 export default function CustomPaginatedTable({
   paginatedData,
   count,
@@ -83,12 +86,31 @@ export default function CustomPaginatedTable({
   rowData,
   handleChangePage,
   handleChangeRowsPerPage,
+  onSelect
 }) {
   const { tableContainer, tableHead, flexRootEnd } = useTableStyles();
 
+  const handleClick = event => {
+    const row = event.target;
+    onSelect(row);
+  } 
+
+
   const renderRows = () => {
+    
+
     return rowData.map((row, index) => (
-      <TableRow key={index} hover>
+     
+      <TableRow 
+        hover
+        key={index} 
+        // selected={isSelected}
+        selected
+        role="checkbox"
+        aria-checked
+        onClick={handleClick}
+        id={row.pop()}
+      >
         {row.map((col, index) => (
           <TableCell key={index}>{col}</TableCell>
         ))}
