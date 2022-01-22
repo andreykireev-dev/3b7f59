@@ -11,10 +11,8 @@ class Api::ProspectImportsController < ApplicationController
     )
     msg = { 
       :status => "Ok", 
-      :errors => false, 
-      result: result
     }
-    render json: msg
+    render json: msg.merge(result)
   end
 
   def prospect_import_params

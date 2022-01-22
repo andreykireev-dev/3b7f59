@@ -23,7 +23,7 @@ class Api::ProspectImportsControllerTest < ActionDispatch::IntegrationTest
 
   end
 
-  test 'create action with uploading a excel should do import' do
+  test 'create action with uploading a csv should do import' do
 
     msg = {
       file: fixture_file_upload('valid_prospects_import_w-header_1.csv', 'text/csv', :binary), 
@@ -42,6 +42,8 @@ class Api::ProspectImportsControllerTest < ActionDispatch::IntegrationTest
 
     assert_equal "Ok", server_response["status"]
     assert_equal false, server_response["errors"]
+    assert_equal true, server_response["imported"]
 
   end
+
 end
