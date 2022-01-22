@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_01_22_161241) do
+ActiveRecord::Schema.define(version: 2022_01_22_163643) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -63,6 +63,12 @@ ActiveRecord::Schema.define(version: 2022_01_22_161241) do
     t.integer "status"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.integer "email_index"
+    t.integer "first_name_index"
+    t.integer "last_name_index"
+    t.boolean "force"
+    t.boolean "has_headers"
+    t.string "original_filename"
     t.index ["user_id"], name: "index_prospect_imports_on_user_id"
   end
 

@@ -1,13 +1,14 @@
 class Api::ProspectImportsController < ApplicationController
   def create
-    result = @user.prospects.import(
-      file: prospect_import_params[:file],
-      email_index: prospect_import_params[:email_index],
-      first_name_index: prospect_import_params[:first_name_index],
-      last_name_index: prospect_import_params[:last_name_index],
-      force: prospect_import_params[:force],
-      has_headers: prospect_import_params[:has_headers]
+
+    prospect_import = @user.prospect_imports.new(
+      original_filename: prospect_import_params[:file].original_filename,
+      **prospect_import_params
     )
+
+    prospect_import.save
+
+    result = prospect_import.run
     msg = { 
       :status => "Ok", 
     }
