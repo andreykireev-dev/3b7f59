@@ -10,10 +10,29 @@ class Prospect < ApplicationRecord
     force: ,
     has_headers: 
   )
+  result = Hash.new
+  import_errors = Array.new
+  imported_rows = 0
 
-    import_errors = Array.new
-    imported_rows = 0
-    result = Hash.new
+  if File.foreach(file).count > 1000000
+    result = result.merge(
+      imported: false, 
+      imported_rows: imported_rows,
+      errors: true, 
+      error_messages: "CSV row size exceeded. Only files smaller than 1m rows are acceptable"
+    )
+    return result
+  end
+
+  if File.size(file) > (200 * 1024 * 1024)
+    result = result.merge(
+      imported: false, 
+      imported_rows: imported_rows,
+      errors: true, 
+      error_messages: "CSV file size exceeded. Only files smaller than 200MB are acceptable"
+    )
+    return result
+  end
 
     CSV.open(file, skip_blanks: true, headers: has_headers) do |csv|
       csv.each do |row|
