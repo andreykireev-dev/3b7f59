@@ -35,10 +35,13 @@ class ProspectImportTest < ActiveSupport::TestCase
     file = File.new(@test_file[:path] + @test_file[:name])
     prospect_import = @prospect_import.dup
 
+    assert prospect_import.uploading?
     prospect_import.file.attach io: file, filename: @prospect_import.original_filename
 
     assert prospect_import.save
+
     assert 1, @user.prospect_imports.count
+
 
 
   end
@@ -66,9 +69,10 @@ class ProspectImportTest < ActiveSupport::TestCase
 
     assert result[:imported]
     refute result[:errors]
-    @user.reload
 
     assert_equal 35, @user.prospects.count
+    
+    assert prospect_import.completed?
         
     first_prospect = Prospect.first
 
@@ -280,7 +284,7 @@ class ProspectImportTest < ActiveSupport::TestCase
     prospect_import.file.attach io: file, filename: @prospect_import.original_filename
 
     result = prospect_import.run
-    
+
     refute result[:imported], result
     assert result[:errors], result
     assert_equal "CSV file size exceeded. Only files smaller than 200MB are acceptable", result[:error_messages]

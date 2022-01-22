@@ -2,6 +2,7 @@ class ProspectImport < ApplicationRecord
   belongs_to :user
   has_one_attached :file
 
+
   enum status: {
     uploading: 0, 
     processing: 1, 
@@ -63,6 +64,8 @@ class ProspectImport < ApplicationRecord
       end
       result = result.merge imported: true, errors: false, imported_rows: imported_rows
       result = result.merge error_messages: import_errors if import_errors.any?
+      
+      completed! # status
       
       return result
     end

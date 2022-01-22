@@ -10,7 +10,7 @@ class Api::ProspectImportsController < ApplicationController
 
     result = prospect_import.run
     msg = { 
-      :status => "Ok", 
+      :status => prospect_import.status, 
     }
     render json: msg.merge(result)
   end

@@ -40,7 +40,7 @@ class Api::ProspectImportsControllerTest < ActionDispatch::IntegrationTest
 
     server_response = JSON.parse @response.body
 
-    assert_equal "Ok", server_response["status"]
+    assert_equal "completed", server_response["status"]
     assert_equal false, server_response["errors"]
     assert_equal true, server_response["imported"]
     assert_equal 35, server_response["imported_rows"]
