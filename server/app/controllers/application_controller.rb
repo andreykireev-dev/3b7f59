@@ -30,6 +30,7 @@ class ApplicationController < ActionController::API
   end
 
   def logged_in_user
+    # byebug
     if decoded_token
       user_id = decoded_token[0]['user_id']
       @user = User.find_by(id: user_id)
