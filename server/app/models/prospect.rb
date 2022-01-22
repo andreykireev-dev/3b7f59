@@ -5,7 +5,7 @@ class Prospect < ApplicationRecord
   def self.import(**args)
 
     import_errors = []
-
+# byebug
     begin
       
       data = CSV.readlines(args[:file])
@@ -47,9 +47,8 @@ class Prospect < ApplicationRecord
       end
 
       rescue => exception
-        error_message = %{
-          Could not load the file. Only CSV files can be imported.
-        }
+        # byebug
+        error_message = %{Could not load the file. There was an error: #{exception} at }
       result = {imported: false, error_message: error_message}
     end
     

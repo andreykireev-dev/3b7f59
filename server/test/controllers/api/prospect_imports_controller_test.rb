@@ -17,7 +17,8 @@ class Api::ProspectImportsControllerTest < ActionDispatch::IntegrationTest
 
     @valid_headers =     {
       "Authorization" => "Bearer #{@auth_token}",
-      "Content-Type" => "application/json"
+      # "Content-Type" => "application/json"
+      "Content-Type"=> "multipart/form-data"
     }
 
   end
@@ -25,12 +26,12 @@ class Api::ProspectImportsControllerTest < ActionDispatch::IntegrationTest
   test 'create action with uploading a excel should do import' do
 
     msg = {
-      file: fixture_file_upload('files/valid_prospects_import_w-header_1.csv', 'text/csv', :binary), 
+      file: fixture_file_upload('valid_prospects_import_w-header_1.csv', 'text/csv', :binary), 
       email_index: "email test", 
       first_name_index: "fname est", 
       last_name_index: "lname test", 
-      force: "ftest", 
-      has_headers: "hed test"
+      force: true, 
+      has_headers: false
     }
 
     post api_prospects_files_import_path, params: msg.to_json, headers: @valid_headers
@@ -40,6 +41,8 @@ class Api::ProspectImportsControllerTest < ActionDispatch::IntegrationTest
     server_response = JSON.parse @response.body
 
     assert_equal "Ok", server_response["status"]
+    assert_equal false, server_response["errors"]
+    puts server_response["result"]
 
   end
 end

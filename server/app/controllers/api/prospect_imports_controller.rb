@@ -1,10 +1,10 @@
 class Api::ProspectImportsController < ApplicationController
   def create
+    result = @user.prospects.import prospect_import_params
     msg = { 
       :status => "Ok", 
-      :message => "Success!", 
-      :html => "<b>...</b>",  
-      **prospect_import_params
+      :errors => false, 
+      result: result
     }
     render json: msg
   end
