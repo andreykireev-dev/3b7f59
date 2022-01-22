@@ -1,6 +1,14 @@
 class Api::ProspectImportsController < ApplicationController
   def create
-    result = @user.prospects.import prospect_import_params
+    byebug if prospect_import_params.empty?
+    result = @user.prospects.import(
+      file: prospect_import_params[:file],
+      email_index: prospect_import_params[:email_index],
+      first_name_index: prospect_import_params[:first_name_index],
+      last_name_index: prospect_import_params[:last_name_index],
+      force: prospect_import_params[:force],
+      has_headers: prospect_import_params[:has_headers]
+    )
     msg = { 
       :status => "Ok", 
       :errors => false, 
@@ -15,8 +23,8 @@ class Api::ProspectImportsController < ApplicationController
       :first_name_index, 
       :last_name_index, 
       :force, 
-      :has_headers,
-      file: {}
+      :has_headers, 
+      :file
     )
   end
 

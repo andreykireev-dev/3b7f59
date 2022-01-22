@@ -34,7 +34,7 @@ class Api::ProspectImportsControllerTest < ActionDispatch::IntegrationTest
       has_headers: false
     }
 
-    post api_prospects_files_import_path, params: msg.to_json, headers: @valid_headers
+    post api_prospects_files_import_path, params: msg, headers: @valid_headers
 
     assert_response :success
 
@@ -42,7 +42,6 @@ class Api::ProspectImportsControllerTest < ActionDispatch::IntegrationTest
 
     assert_equal "Ok", server_response["status"]
     assert_equal false, server_response["errors"]
-    puts server_response["result"]
 
   end
 end
