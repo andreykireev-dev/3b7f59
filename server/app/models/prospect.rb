@@ -11,8 +11,14 @@ class Prospect < ApplicationRecord
     has_headers: 
   )
 
-    import_errors = []
-      CSV.foreach(file, skip_blanks: true, headers: has_headers) do |row|
+    import_errors = Array.new
+    imported_rows = 0
+    result = Hash.new
+
+    CSV.open(file, skip_blanks: true, headers: has_headers) do |csv|
+      csv.each do |row|
+        imported_rows = csv.lineno
+        imported_rows -= 1 if has_headers
 
         # create hash from headers and cells
         prospect_data = {
@@ -20,7 +26,7 @@ class Prospect < ApplicationRecord
           first_name: row[first_name_index],
           last_name: row[last_name_index],
         }
-        
+
         if self.exists? email: prospect_data[:email]
           existing_prospect = self.find_by email: prospect_data[:email]
           existing_prospect.update prospect_data
@@ -29,17 +35,14 @@ class Prospect < ApplicationRecord
           if new_prospect.valid?
             new_prospect.save
           else 
-            import_errors << "Row #{idx+1}: #{new_prospect.errors.full_messages.join(' ')}"
+            import_errors << "Row #{imported_rows}: #{new_prospect.errors.full_messages.join(' ')}"
           end
 
         end
       end
-
-      if import_errors.any?
-        result = {imported: true, errors: true, error_messages: import_errors}
-      else  
-        result = {imported: true, errors: false}
-      end
+    end
+    result = result.merge imported: true, errors: false, imported_rows: imported_rows
+    result = result.merge error_messages: import_errors if import_errors.any?
     
     return result
   end

@@ -27,11 +27,11 @@ class Api::ProspectImportsControllerTest < ActionDispatch::IntegrationTest
 
     msg = {
       file: fixture_file_upload('valid_prospects_import_w-header_1.csv', 'text/csv', :binary), 
-      email_index: "email test", 
-      first_name_index: "fname est", 
-      last_name_index: "lname test", 
+      email_index: 0, 
+      first_name_index: 1, 
+      last_name_index: 2, 
       force: true, 
-      has_headers: false
+      has_headers: true
     }
 
     post api_prospects_files_import_path, params: msg, headers: @valid_headers
@@ -43,6 +43,7 @@ class Api::ProspectImportsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Ok", server_response["status"]
     assert_equal false, server_response["errors"]
     assert_equal true, server_response["imported"]
+    assert_equal 35, server_response["imported_rows"]
 
   end
 
