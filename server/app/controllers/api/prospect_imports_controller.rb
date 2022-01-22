@@ -1,6 +1,5 @@
 class Api::ProspectImportsController < ApplicationController
   def create
-    byebug if prospect_import_params.empty?
     result = @user.prospects.import(
       file: prospect_import_params[:file],
       email_index: prospect_import_params[:email_index],
