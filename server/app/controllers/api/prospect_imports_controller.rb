@@ -1,7 +1,7 @@
 class Api::ProspectImportsController < ApplicationController
   def create
     msg = { 
-      :status => "ok", 
+      :status => "Ok", 
       :message => "Success!", 
       :html => "<b>...</b>",  
       **prospect_import_params
