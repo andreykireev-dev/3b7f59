@@ -1,11 +1,13 @@
 class ProspectImport < ApplicationRecord
   belongs_to :user
   has_one_attached :file
+  attr_accessor :done_rows
+  
 
 
   enum status: {
     uploading: 0, 
-    processing: 1, 
+    queued: 1, 
     completed: 2, 
     purged: 3
   }, _default: 0
@@ -14,6 +16,7 @@ class ProspectImport < ApplicationRecord
     result = Hash.new
     import_errors = Array.new
     imported_rows = 0
+    @done_rows = 0
     
 
     if file.open{|f| f.count} > 1000000
@@ -40,6 +43,11 @@ class ProspectImport < ApplicationRecord
         csv.each do |row|
           imported_rows = csv.lineno
           imported_rows -= 1 if has_headers
+          self.done_rows = imported_rows
+
+          # if  @done_rows == 25
+          #   debugger
+          # end
   
           # create hash from headers and cells
           prospect_data = {
@@ -70,4 +78,32 @@ class ProspectImport < ApplicationRecord
       return result
     end
   end
+
+  def run_later
+    ProcessProspectImportsJob.perform_later(self)
+    self.queued!
+  end
+
+  def total_rows
+    file_rows_count = file.open{|f| f.count}
+    if has_headers
+      data_rows_count = file_rows_count - 1
+    else 
+      data_rows_count = file_rows_count
+    end
+    return data_rows_count
+    
+  end
+
+  def done_rows
+    # debugger
+    # cache = ActiveSupport::Cache::MemoryStore.new
+    Rails.cache.read("prospect_import_#{self.id}") || 0
+  end
+
+  def done_rows=(count)
+    # cache = ActiveSupport::Cache::MemoryStore.new
+    Rails.cache.write("prospect_import_#{self.id}",count)
+  end
+
 end

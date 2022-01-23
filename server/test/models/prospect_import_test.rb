@@ -79,6 +79,9 @@ class ProspectImportTest < ActiveSupport::TestCase
     assert_equal "email1@example.com", first_prospect.email
     assert_equal "First1", first_prospect.first_name
     assert_equal "Last1", first_prospect.last_name
+
+    assert_equal 35, prospect_import.total_rows
+    assert_equal 35, prospect_import.done_rows
   end
 
   test 'import method should import prospects from file - no header' do
@@ -291,6 +294,53 @@ class ProspectImportTest < ActiveSupport::TestCase
 
     File.delete(large_file)
 
+  end
+
+  test "total_rows method should show total rows in the file with header" do
+    @test_file[:name] = "valid_prospects_import_w-header_2.csv"
+
+    file = File.open(@test_file[:path] + @test_file[:name])
+
+    prospect_import = @user.prospect_imports.new(
+      email_index: 1,
+      first_name_index: 0,
+      last_name_index: 2,
+      force: true,
+      has_headers: true,
+      original_filename: @test_file[:name]
+    )
+    assert prospect_import.save
+
+    prospect_import.file.attach io: file, filename: @prospect_import.original_filename
+
+    assert_equal 35, prospect_import.total_rows
+
+  end
+
+  test "total_rows method should show total rows in the file without header" do
+    @test_file[:name] = "valid_prospects_import_wo-header_2.csv"
+
+    file = File.open(@test_file[:path] + @test_file[:name])
+
+    prospect_import = @user.prospect_imports.new(
+      email_index: 1,
+      first_name_index: 0,
+      last_name_index: 2,
+      force: true,
+      has_headers: false,
+      original_filename: @test_file[:name]
+    )
+    assert prospect_import.save
+
+    prospect_import.file.attach io: file, filename: @prospect_import.original_filename
+
+    assert_equal 35, prospect_import.total_rows
+
+  end
+
+  test "done_rows should default to 0" do
+    prospect_import = @user.prospect_imports.new
+    assert_equal 0, prospect_import.done_rows
   end
 
 end
