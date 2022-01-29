@@ -18,11 +18,10 @@ class ProspectImportTest < ActiveSupport::TestCase
       has_headers: true,
       original_filename: @test_file[:name]
     )
-
-
     
   end
 
+  
   def after_teardown
     super
     # clean up test file storage
@@ -251,7 +250,7 @@ class ProspectImportTest < ActiveSupport::TestCase
 
   test 'import file over 1m rows should not work' do
     
-    large_file = '1mrows.txt'
+    large_file = 'tmp/1mrows.txt'
 
     f = File.open(large_file, "w+") 
 
@@ -289,7 +288,7 @@ class ProspectImportTest < ActiveSupport::TestCase
 
   test 'import file over 200BV should not work' do
     
-    large_file = '200mb.txt'
+    large_file = 'tmp/200mb.txt'
 
     f = File.open(large_file, "w+") 
 

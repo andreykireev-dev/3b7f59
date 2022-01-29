@@ -26,13 +26,14 @@ class Api::ProspectImportsController < ApplicationController
   end
 
   def show
+    
     begin
       prospect_import = @user.prospect_imports.find params[:id]
     rescue ActiveRecord::RecordNotFound
       render :status => :not_found
       return
     end
-    # debugger if prospect_import.completed?
+
     render json: {
       total: prospect_import.total_rows,
       done: prospect_import.done_rows
@@ -59,7 +60,6 @@ class Api::ProspectImportsController < ApplicationController
   def validate_params
     errors = []
 
-    # debugger
     prospect_import_params.to_enum.each do |field, value|
 
       case ProspectImport.columns_hash[field]&.type

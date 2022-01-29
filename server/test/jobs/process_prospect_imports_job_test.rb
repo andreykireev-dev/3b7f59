@@ -29,14 +29,15 @@ class ProcessProspectImportsJobTest < ActiveJob::TestCase
     
   end
 
+  def after_teardown
+    super
+    # clean up test file storage
+    FileUtils.rm_rf(ActiveStorage::Blob.service.root)
+  end
+
+
 
   test "running job should import prospects" do
-
-    # prospect_import = @prospect_import.dup
-    # file = @file.dup
-    # prospect_import.file.attach io: @file, filename: @test_file[:name]
-    # prospect_import.save
-
 
     ProcessProspectImportsJob.perform_now(@prospect_import)
 
