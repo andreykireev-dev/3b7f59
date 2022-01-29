@@ -2,7 +2,6 @@ require "test_helper"
 require "authorization_helper"
 
 class Api::ProspectImportsControllerTest < ActionDispatch::IntegrationTest
-  # include Devise::Test::IntegrationHelpers
   include AuthorizationHelper
 
 
@@ -17,7 +16,6 @@ class Api::ProspectImportsControllerTest < ActionDispatch::IntegrationTest
 
     @valid_headers =     {
       "Authorization" => "Bearer #{@auth_token}",
-      # "Content-Type" => "application/json"
       "Content-Type"=> "multipart/form-data"
     }
 
