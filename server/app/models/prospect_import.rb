@@ -5,7 +5,6 @@ class ProspectImport < ApplicationRecord
 
   validates_presence_of :email_index 
   validate :file_presence_validation
-  validate :param_types_validation
 
   
   
@@ -20,19 +19,6 @@ class ProspectImport < ApplicationRecord
   def file_presence_validation
     errors.add(:file, "is not attached") unless file.attached?
   end
-
-  def param_types_validation
-    debugger if first_name_index == 8
-    errors.add(:email_index, "must be an Integer") unless email_index.class == Integer
-    errors.add(:first_name_index, "must be an Integer") unless first_name_index.class == Integer
-    errors.add(:last_name_index, "must be an Integer") unless last_name_index.class == Integer
-    errors.add(:force, "must be an Boolean") unless force.class.in? [TrueClass,FalseClass]
-    errors.add(:has_headers, "must be an Boolean") unless has_headers.class.in? [TrueClass,FalseClass]
-  end
-
-  # def check_type(variable, class)
-  #   true
-  # end
 
   def run
     result = Hash.new
@@ -74,8 +60,10 @@ class ProspectImport < ApplicationRecord
           }
   
           if user.prospects.exists? email: prospect_data[:email]
-            existing_prospect = user.prospects.find_by email: prospect_data[:email]
-            existing_prospect.update prospect_data
+            if force
+              existing_prospect = user.prospects.find_by email: prospect_data[:email]
+              existing_prospect.update prospect_data
+            end
           else
             new_prospect = user.prospects.new prospect_import: self, **prospect_data
             if new_prospect.valid?

@@ -180,6 +180,50 @@ class Api::ProspectImportsControllerTest < ActionDispatch::IntegrationTest
     refute server_response["job_id"].present? 
 
   end
+  
+  test "post with wrong email index type should not be successful" do
+    msg = {
+      file: fixture_file_upload('valid_prospects_import_w-header_2.csv', 'text/csv', :binary), 
+      email_index: "zero", 
+      first_name_index: 1, 
+      last_name_index: 2, 
+      force: true, 
+      has_headers: true
+    }
+
+    post api_prospects_files_import_path, params: msg, headers: @valid_headers
+
+    assert_response :success
+
+    server_response = JSON.parse @response.body
+
+    assert_equal "error", server_response["status"]
+    assert_equal "Email Index must be an Integer", server_response["messages"].first
+    refute server_response["job_id"].present? 
+
+  end
+  
+  test "post with wrong file type should not be successful" do
+    msg = {
+      file: "some file", 
+      email_index: 0, 
+      first_name_index: 1, 
+      last_name_index: 2, 
+      force: true, 
+      has_headers: true
+    }
+
+    post api_prospects_files_import_path, params: msg, headers: @valid_headers
+
+    assert_response :success
+
+    server_response = JSON.parse @response.body
+
+    assert_equal "error", server_response["status"]
+    assert_equal "File must be a CSV attachment", server_response["messages"].first
+    refute server_response["job_id"].present? 
+
+  end
 
 
 end

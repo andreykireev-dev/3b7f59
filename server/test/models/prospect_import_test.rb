@@ -216,6 +216,39 @@ class ProspectImportTest < ActiveSupport::TestCase
     assert_equal "Last3", first_prospect.last_name
   end
 
+  test 'import with duplicate and force=false should not overwrite' do
+    
+    @test_file[:name] = "duplicate_values.csv"
+
+    file = File.open(@test_file[:path] + @test_file[:name])
+
+    prospect_import = @user.prospect_imports.new(
+      email_index: 0,
+      first_name_index: 1,
+      last_name_index: 2,
+      force: false,
+      has_headers: true,
+      original_filename: @test_file[:name]
+    )
+    
+    prospect_import.file.attach io: file, filename: @prospect_import.original_filename
+    assert prospect_import.save
+
+    result = prospect_import.run
+
+
+    assert result[:imported]
+    refute result[:errors]
+
+    assert_equal 1, @user.prospects.count
+    
+    first_prospect = Prospect.first
+
+    assert_equal "email1@example.com", first_prospect.email
+    assert_equal "First1", first_prospect.first_name
+    assert_equal "Last1", first_prospect.last_name
+  end
+
   test 'import file over 1m rows should not work' do
     
     large_file = '1mrows.txt'
@@ -355,24 +388,5 @@ class ProspectImportTest < ActiveSupport::TestCase
     refute prospect_import.save
   end
 
-  test "should validate param types" do
-    @test_file[:name] = "valid_prospects_import_wo-header_2.csv"
-
-    file = File.open(@test_file[:path] + @test_file[:name])
-
-    prospect_import = @user.prospect_imports.new(
-      email_index: "One",
-      first_name_index: 8,
-      last_name_index: 2,
-      force: true,
-      has_headers: false,
-      original_filename: @test_file[:name]
-    )
-    
-    prospect_import.file.attach io: file, filename: @prospect_import.original_filename
-    
-    refute prospect_import.save
-    assert_equal "Email index must be an Integer", prospect_import.errors.full_messages.first
-  end
 
 end
