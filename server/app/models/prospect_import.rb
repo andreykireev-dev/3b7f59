@@ -1,16 +1,38 @@
 class ProspectImport < ApplicationRecord
   belongs_to :user
   has_one_attached :file
-  attr_accessor :done_rows
+  has_many :prospects
+
+  validates_presence_of :email_index 
+  validate :file_presence_validation
+  validate :param_types_validation
+
   
-
-
+  
+  
   enum status: {
     uploading: 0, 
     queued: 1, 
     completed: 2, 
     purged: 3
-  }, _default: 0
+    }, _default: 0
+    
+  def file_presence_validation
+    errors.add(:file, "is not attached") unless file.attached?
+  end
+
+  def param_types_validation
+    debugger if first_name_index == 8
+    errors.add(:email_index, "must be an Integer") unless email_index.class == Integer
+    errors.add(:first_name_index, "must be an Integer") unless first_name_index.class == Integer
+    errors.add(:last_name_index, "must be an Integer") unless last_name_index.class == Integer
+    errors.add(:force, "must be an Boolean") unless force.class.in? [TrueClass,FalseClass]
+    errors.add(:has_headers, "must be an Boolean") unless has_headers.class.in? [TrueClass,FalseClass]
+  end
+
+  # def check_type(variable, class)
+  #   true
+  # end
 
   def run
     result = Hash.new
@@ -43,12 +65,7 @@ class ProspectImport < ApplicationRecord
         csv.each do |row|
           imported_rows = csv.lineno
           imported_rows -= 1 if has_headers
-          self.done_rows = imported_rows
 
-          # if  @done_rows == 25
-          #   debugger
-          # end
-  
           # create hash from headers and cells
           prospect_data = {
             email: row[email_index],
@@ -60,7 +77,7 @@ class ProspectImport < ApplicationRecord
             existing_prospect = user.prospects.find_by email: prospect_data[:email]
             existing_prospect.update prospect_data
           else
-            new_prospect = user.prospects.new prospect_data
+            new_prospect = user.prospects.new prospect_import: self, **prospect_data
             if new_prospect.valid?
               new_prospect.save
             else 
@@ -96,14 +113,9 @@ class ProspectImport < ApplicationRecord
   end
 
   def done_rows
-    # debugger
-    # cache = ActiveSupport::Cache::MemoryStore.new
-    Rails.cache.read("prospect_import_#{self.id}") || 0
+    self.prospects.count
   end
 
-  def done_rows=(count)
-    # cache = ActiveSupport::Cache::MemoryStore.new
-    Rails.cache.write("prospect_import_#{self.id}",count)
-  end
+
 
 end

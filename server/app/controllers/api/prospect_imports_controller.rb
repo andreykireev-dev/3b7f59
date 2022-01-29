@@ -2,18 +2,24 @@ class Api::ProspectImportsController < ApplicationController
   def create
 
     prospect_import = @user.prospect_imports.new(
-      original_filename: prospect_import_params[:file].original_filename,
+      original_filename: prospect_import_params[:file]&.original_filename,
       **prospect_import_params
     )
 
-    prospect_import.save
+    if prospect_import.save
 
-    prospect_import.run_later
+      prospect_import.run_later
 
-    render json: {
-      job_id: prospect_import.id,
-      status: prospect_import.status
-    }
+      render json: {
+        job_id: prospect_import.id,
+        status: prospect_import.status
+      }
+    else 
+      render json: {
+        status: "error",
+        messages: prospect_import.errors.full_messages
+      }
+    end
   end
 
   def show

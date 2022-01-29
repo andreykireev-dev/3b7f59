@@ -61,9 +61,9 @@ class ProspectImportTest < ActiveSupport::TestCase
       has_headers: true,
       original_filename: @test_file[:name]
     )
-    assert prospect_import.save
-
+    
     prospect_import.file.attach io: file, filename: @prospect_import.original_filename
+    assert prospect_import.save
 
     result = prospect_import.run
 
@@ -98,9 +98,9 @@ class ProspectImportTest < ActiveSupport::TestCase
       has_headers: false,
       original_filename: @test_file[:name]
     )
-    assert prospect_import.save
-
+    
     prospect_import.file.attach io: file, filename: @prospect_import.original_filename
+    assert prospect_import.save
 
     result = prospect_import.run
 
@@ -130,9 +130,9 @@ class ProspectImportTest < ActiveSupport::TestCase
       has_headers: true,
       original_filename: @test_file[:name]
     )
-    assert prospect_import.save
-
+    
     prospect_import.file.attach io: file, filename: @prospect_import.original_filename
+    assert prospect_import.save
 
     result = prospect_import.run
 
@@ -163,9 +163,9 @@ class ProspectImportTest < ActiveSupport::TestCase
       original_filename: @test_file[:name]
     )
 
-    assert prospect_import.save
-
+    
     prospect_import.file.attach io: file, filename: @prospect_import.original_filename
+    assert prospect_import.save
 
     result = prospect_import.run
 
@@ -197,9 +197,9 @@ class ProspectImportTest < ActiveSupport::TestCase
       has_headers: true,
       original_filename: @test_file[:name]
     )
-    assert prospect_import.save
-
+    
     prospect_import.file.attach io: file, filename: @prospect_import.original_filename
+    assert prospect_import.save
 
     result = prospect_import.run
 
@@ -240,9 +240,9 @@ class ProspectImportTest < ActiveSupport::TestCase
       has_headers: true,
       original_filename: @test_file[:name]
     )
-    assert prospect_import.save
-
+    
     prospect_import.file.attach io: file, filename: @prospect_import.original_filename
+    assert prospect_import.save
 
     result = prospect_import.run
 
@@ -282,9 +282,9 @@ class ProspectImportTest < ActiveSupport::TestCase
       has_headers: true,
       original_filename: @test_file[:name]
     )
-    assert prospect_import.save
-
+    
     prospect_import.file.attach io: file, filename: @prospect_import.original_filename
+    assert prospect_import.save
 
     result = prospect_import.run
 
@@ -309,9 +309,9 @@ class ProspectImportTest < ActiveSupport::TestCase
       has_headers: true,
       original_filename: @test_file[:name]
     )
-    assert prospect_import.save
-
+    
     prospect_import.file.attach io: file, filename: @prospect_import.original_filename
+    assert prospect_import.save
 
     assert_equal 35, prospect_import.total_rows
 
@@ -330,9 +330,9 @@ class ProspectImportTest < ActiveSupport::TestCase
       has_headers: false,
       original_filename: @test_file[:name]
     )
-    assert prospect_import.save
-
+    
     prospect_import.file.attach io: file, filename: @prospect_import.original_filename
+    assert prospect_import.save
 
     assert_equal 35, prospect_import.total_rows
 
@@ -341,6 +341,38 @@ class ProspectImportTest < ActiveSupport::TestCase
   test "done_rows should default to 0" do
     prospect_import = @user.prospect_imports.new
     assert_equal 0, prospect_import.done_rows
+  end
+
+  test "shouldn't be able to save without file" do
+
+    prospect_import = @user.prospect_imports.new(
+      email_index: 1,
+      first_name_index: 0,
+      last_name_index: 2,
+      force: true,
+      has_headers: false,
+    )
+    refute prospect_import.save
+  end
+
+  test "should validate param types" do
+    @test_file[:name] = "valid_prospects_import_wo-header_2.csv"
+
+    file = File.open(@test_file[:path] + @test_file[:name])
+
+    prospect_import = @user.prospect_imports.new(
+      email_index: "One",
+      first_name_index: 8,
+      last_name_index: 2,
+      force: true,
+      has_headers: false,
+      original_filename: @test_file[:name]
+    )
+    
+    prospect_import.file.attach io: file, filename: @prospect_import.original_filename
+    
+    refute prospect_import.save
+    assert_equal "Email index must be an Integer", prospect_import.errors.full_messages.first
   end
 
 end

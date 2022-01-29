@@ -119,4 +119,67 @@ class Api::ProspectImportsControllerTest < ActionDispatch::IntegrationTest
     assert_response :not_found
   end
 
+  test "unauthorized post should give 403" do
+    msg = {
+      file: fixture_file_upload('valid_prospects_import_w-header_2.csv', 'text/csv', :binary), 
+      email_index: 0, 
+      first_name_index: 1, 
+      last_name_index: 2, 
+      force: true, 
+      has_headers: true
+    }
+
+    post api_prospects_files_import_path, params: msg
+    assert_response :unauthorized
+  end
+
+  test "unauthorized get should give 403" do
+    get "/api/prospects_files/666/progress"
+    assert_response :unauthorized
+  end
+
+  test "post with missing file should not be successful" do
+    msg = {
+      # file: fixture_file_upload('valid_prospects_import_w-header_2.csv', 'text/csv', :binary), 
+      email_index: 0, 
+      first_name_index: 1, 
+      last_name_index: 2, 
+      force: true, 
+      has_headers: true
+    }
+
+    post api_prospects_files_import_path, params: msg, headers: @valid_headers
+
+    assert_response :success
+
+    server_response = JSON.parse @response.body
+
+    assert_equal "error", server_response["status"]
+    refute server_response["job_id"].present? 
+
+  end
+
+  
+  test "post with missing email index should not be successful" do
+    msg = {
+      file: fixture_file_upload('valid_prospects_import_w-header_2.csv', 'text/csv', :binary), 
+      # email_index: 0, 
+      first_name_index: 1, 
+      last_name_index: 2, 
+      force: true, 
+      has_headers: true
+    }
+
+    post api_prospects_files_import_path, params: msg, headers: @valid_headers
+
+    assert_response :success
+
+    server_response = JSON.parse @response.body
+
+    assert_equal "error", server_response["status"]
+    refute server_response["job_id"].present? 
+
+  end
+
+
 end
