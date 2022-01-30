@@ -11,6 +11,10 @@ import FirstPageIcon from "@material-ui/icons/FirstPage";
 import KeyboardArrowLeft from "@material-ui/icons/KeyboardArrowLeft";
 import KeyboardArrowRight from "@material-ui/icons/KeyboardArrowRight";
 import LastPageIcon from "@material-ui/icons/LastPage";
+import Checkbox from "@material-ui/core/Checkbox";
+import moment from "moment";
+
+
 
 import { Grid, TableCell, Typography } from "@material-ui/core";
 import { NUM_ROWS_PER_PAGE_CHOICES } from "../constants/table";
@@ -85,38 +89,40 @@ export default function CustomPaginatedTable({
   headerColumns,
   rowData,
   handleChangePage,
-  handleChangeRowsPerPage,
-  onSelect
+  handleChangeRowsPerPage
+  
 }) {
   const { tableContainer, tableHead, flexRootEnd } = useTableStyles();
+  const [selected, setSelected] = React.useState([]);
 
-  const handleClick = event => {
-    const row = event.target;
-    onSelect(row);
-  } 
+  const isSelected = (name) => selected.indexOf(name) !== -1;
+  
+  const handleClick = (event, name) => {
+    const selectedIndex = selected.indexOf(name);
+    let newSelected = [];
 
-
-  const renderRows = () => {
+    if (selectedIndex === -1) {
+      newSelected = newSelected.concat(selected, name);
+    } else if (selectedIndex === 0) {
+      newSelected = newSelected.concat(selected.slice(1));
+    } else if (selectedIndex === selected.length - 1) {
+      newSelected = newSelected.concat(selected.slice(0, -1));
+    } else if (selectedIndex > 0) {
+      newSelected = newSelected.concat(
+        selected.slice(0, selectedIndex),
+        selected.slice(selectedIndex + 1),
+      );
+    }
+  
+    setSelected(newSelected);
+  };
+  
+  
+  // const renderRows = () => {
+    
     
 
-    return rowData.map((row, index) => (
-     
-      <TableRow 
-        hover
-        key={index} 
-        // selected={isSelected}
-        selected
-        role="checkbox"
-        aria-checked
-        onClick={handleClick}
-        id={row.pop()}
-      >
-        {row.map((col, index) => (
-          <TableCell key={index}>{col}</TableCell>
-        ))}
-      </TableRow>
-    ));
-  };
+  // };
 
   if (paginatedData.length === 0) {
     return (
@@ -147,9 +153,12 @@ export default function CustomPaginatedTable({
         />
       </div>
       <Paper className={tableContainer} component={Paper}>
-        <MaterialTable aria-label="custom pagination table">
+        <MaterialTable aria-label="custom pagination table" >
           <TableHead className={tableHead}>
             <TableRow>
+              <TableCell padding="checkbox">
+                <Checkbox />
+              </TableCell>
               {headerColumns.map((col, index) => (
                 <React.Fragment key={index}>
                   <TableCell variant="head">{col}</TableCell>
@@ -157,7 +166,48 @@ export default function CustomPaginatedTable({
               ))}
             </TableRow>
           </TableHead>
-          <TableBody>{renderRows()}</TableBody>
+          <TableBody>{
+                paginatedData.map((row) => {
+                  const isItemSelected = isSelected(row.id);
+
+                  // row.email,
+                  // row.first_name,
+                  // row.last_name,
+                  // moment(row.created_at).format("MMM d"),
+                  // moment(row.updated_at).format("MMM d"),
+                  
+                  return (
+                      <TableRow 
+                        hover
+                        key={row.id} 
+                        // selected={isSelected}
+                        // selected
+                        // role="checkbox"
+                        // aria-checked
+                        // onClick={handleClick}
+                        id={row.id}
+                      >
+                        <TableCell padding="checkbox">
+                          <Checkbox 
+                            id={`checkbox-${row.id}`}
+                            name={`checkbox-${row.id}`}
+                            color="primary"
+                            checked={isItemSelected}
+                            onClick={(event) => handleClick(event, row.id)}
+                          />
+                        </TableCell>
+                        {[row.email, 
+                          row.first_name,
+                          row.last_name,
+                          moment(row.created_at).format("MMM d"),
+                          moment(row.updated_at).format("MMM d"),
+                        ].map((col) => (
+                          <TableCell>{col}</TableCell>
+                        ))}
+                      </TableRow>
+                  );
+                })
+          }</TableBody>
           <TableFooter>
             <TableRow></TableRow>
           </TableFooter>
