@@ -11,10 +11,15 @@ import FirstPageIcon from "@material-ui/icons/FirstPage";
 import KeyboardArrowLeft from "@material-ui/icons/KeyboardArrowLeft";
 import KeyboardArrowRight from "@material-ui/icons/KeyboardArrowRight";
 import LastPageIcon from "@material-ui/icons/LastPage";
+import Checkbox from "@material-ui/core/Checkbox";
+import moment from "moment";
+
+
 
 import { Grid, TableCell, Typography } from "@material-ui/core";
-import { NUM_ROWS_PER_PAGE_CHOICES } from "../constants/table";
-import { useTableStyles } from "../styles/table";
+import { NUM_ROWS_PER_PAGE_CHOICES } from "../../constants/table";
+import { useTableStyles } from "../../styles/table";
+
 
 function TablePaginationActions(props) {
   const { paginationRoot, paginationIconButton } = useTableStyles();
@@ -74,27 +79,93 @@ function TablePaginationActions(props) {
   );
 }
 
+
+
 export default function CustomPaginatedTable({
   paginatedData,
   count,
   page,
   rowsPerPage,
   headerColumns,
-  rowData,
   handleChangePage,
   handleChangeRowsPerPage,
+  selected, setSelected,
+  enableCheckbox
+  
 }) {
-  const { tableContainer, tableHead, flexRootEnd } = useTableStyles();
 
-  const renderRows = () => {
-    return rowData.map((row, index) => (
-      <TableRow key={index} hover>
-        {row.map((col, index) => (
-          <TableCell key={index}>{col}</TableCell>
-        ))}
-      </TableRow>
-    ));
+  const { tableContainer, tableHead, flexRootEnd } = useTableStyles();
+  
+  const isSelected = (name) => selected.indexOf(name) !== -1;
+  const allSelected = () => paginatedData.map(row=>row.id).every(elem => selected.includes(elem));
+
+  const handleSelectAll = () => {
+    if (allSelected()) {
+      // unselect all
+      let newSelected = [];
+
+      for (const rowId of paginatedData.map(row=>row.id)) {
+        const index = selected.indexOf(rowId);
+        if (index > -1) {
+          newSelected = newSelected.splice(index,1);
+        }
+      } 
+      setSelected(newSelected);
+
+    } else {
+      // select all
+      let newSelected = [];
+      for (const rowId of paginatedData.map(row=>row.id)) {
+        const index = selected.indexOf(rowId);
+        if (index === -1) {
+          newSelected = newSelected.concat(selected, rowId)
+        }
+      } 
+      setSelected(newSelected);
+    }
+
+  }
+
+  const selectItem = (id) => {
+    const selectedIndex = selected.indexOf(id);
+    let newSelected = [];
+
+    if (selectedIndex === -1) {
+      newSelected = newSelected.concat(selected, id);
+    } 
+
+    setSelected(newSelected);
   };
+
+  const unselectItem = (id) => {
+    const selectedIndex = selected.indexOf(id);
+    let newSelected = [];
+
+    if (selectedIndex === 0) {
+      newSelected = newSelected.concat(selected.slice(1));
+    } else if (selectedIndex === selected.length - 1) {
+      newSelected = newSelected.concat(selected.slice(0, -1));
+    } else if (selectedIndex > 0) {
+      newSelected = newSelected.concat(
+        selected.slice(0, selectedIndex),
+        selected.slice(selectedIndex + 1),
+      );
+    }
+
+    setSelected(newSelected);
+  };
+
+  
+  const toggleSelection = (event, id) => {
+    const selectedIndex = selected.indexOf(id);
+
+    if (selectedIndex === -1) {
+      selectItem(id);
+    } else {
+      unselectItem(id);
+    }
+  };
+  
 
   if (paginatedData.length === 0) {
     return (
@@ -125,9 +196,17 @@ export default function CustomPaginatedTable({
         />
       </div>
       <Paper className={tableContainer} component={Paper}>
-        <MaterialTable aria-label="custom pagination table">
+        <MaterialTable aria-label="custom pagination table" >
           <TableHead className={tableHead}>
             <TableRow>
+              {enableCheckbox &&  
+                <TableCell padding="checkbox">
+                  <Checkbox
+                    checked={allSelected()}
+                    onClick={handleSelectAll}
+                  />
+                </TableCell>
+              }
               {headerColumns.map((col, index) => (
                 <React.Fragment key={index}>
                   <TableCell variant="head">{col}</TableCell>
@@ -135,7 +214,38 @@ export default function CustomPaginatedTable({
               ))}
             </TableRow>
           </TableHead>
-          <TableBody>{renderRows()}</TableBody>
+          <TableBody>{
+                paginatedData.map((row) => {
+
+                  return (
+                      <TableRow 
+                        hover
+                        key={row.id} 
+                        id={row.id}
+                      >
+                        {enableCheckbox &&  
+                          <TableCell padding="checkbox">
+                            <Checkbox 
+                              id={`checkbox-${row.id}`}
+                              name={`checkbox-${row.id}`}
+                              color="primary"
+                              checked={isSelected(row.id)}
+                              onClick={(event) => toggleSelection(event, row.id)}
+                            />
+                          </TableCell>
+                        }
+                        {[row.email, 
+                          row.first_name,
+                          row.last_name,
+                          moment(row.created_at).format("MMM d"),
+                          moment(row.updated_at).format("MMM d"),
+                        ].map((col) => (
+                          <TableCell>{col}</TableCell>
+                        ))}
+                      </TableRow>
+                  );
+                })
+          }</TableBody>
           <TableFooter>
             <TableRow></TableRow>
           </TableFooter>

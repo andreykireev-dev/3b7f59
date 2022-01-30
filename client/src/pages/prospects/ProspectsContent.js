@@ -1,9 +1,10 @@
 import React from "react";
+import moment from "moment";
 
 import { Grid, CircularProgress } from "@material-ui/core";
 
 import PageTitle from "pages/mainlayout/PageTitle";
-import PaginatedTable from "common/PaginatedTable";
+import ProspectsTable from "pages/prospects/ProspectsTable";
 
 
 
@@ -15,10 +16,19 @@ const Content = ({
   rowsPerPage,
   handleChangePage,
   handleChangeRowsPerPage,
+  selected,
+  setSelected,
+
 
 }) => {
 
-  
+  const rowData = paginatedData.map((row) => [
+    row.email,
+    row.first_name,
+    row.last_name,
+    moment(row.created_at).format("MMM d"),
+    moment(row.updated_at).format("MMM d"),
+  ]);
 
 
   return (
@@ -29,7 +39,7 @@ const Content = ({
           <CircularProgress />
         </Grid>
       ) : (
-        <PaginatedTable
+        <ProspectsTable
           paginatedData={paginatedData}
           handleChangePage={handleChangePage}
           handleChangeRowsPerPage={handleChangeRowsPerPage}
@@ -43,6 +53,11 @@ const Content = ({
             "Created",
             "Updated",
           ]}
+          selected={selected}
+          setSelected={setSelected}
+          rowData={rowData}
+          enableCheckbox={true}
+
         />
       )}
     </>

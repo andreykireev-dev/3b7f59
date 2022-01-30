@@ -11,6 +11,7 @@ const Prospects = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(DEFAULT_NUM_ROWS_PER_PAGE);
   const [count, setCount] = useState(0);
+  const [selected, setSelected] = useState([]);
 
   const handleChangeRowsPerPage = (event, _) => {
     setRowsPerPage(event.target.value);
@@ -54,6 +55,8 @@ const Prospects = () => {
             rowsPerPage={rowsPerPage}
             handleChangePage={handleChangePage}
             handleChangeRowsPerPage={handleChangeRowsPerPage}
+            selected={selected}
+            setSelected={setSelected}
           />
         }
       />
