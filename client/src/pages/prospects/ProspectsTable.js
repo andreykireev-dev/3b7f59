@@ -94,37 +94,40 @@ export default function CustomPaginatedTable({
   
 }) {
 
-  const { tableContainer, tableHead, flexRootEnd } = useTableStyles();
+  const { tableContainer, tableHead, flexRoot, flexRootStart, flexRootEnd } = useTableStyles();
   
   const isSelected = (name) => selected.indexOf(name) !== -1;
   const allSelected = () => paginatedData.map(row=>row.id).every(elem => selected.includes(elem));
 
   const handleSelectAll = () => {
+    let newSelected = [];
+
     if (allSelected()) {
       // unselect all
-      let newSelected = [];
+      newSelected = [...selected];
 
-      for (const rowId of paginatedData.map(row=>row.id)) {
-        const index = selected.indexOf(rowId);
+      paginatedData.map(row=>row.id).forEach(id => {
+        const index = newSelected.indexOf(id);
         if (index > -1) {
-          newSelected = newSelected.splice(index,1);
+          newSelected.splice(index,1);
         }
-      } 
+      });
       setSelected(newSelected);
-
     } else {
       // select all
-      let newSelected = [];
-      for (const rowId of paginatedData.map(row=>row.id)) {
-        const index = selected.indexOf(rowId);
+      paginatedData.map(row=>row.id).forEach(id => {
+        const index = selected.indexOf(id);
         if (index === -1) {
-          newSelected = newSelected.concat(selected, rowId)
+          newSelected = newSelected.concat(id)
         }
-      } 
-      setSelected(newSelected);
+      });
+      newSelected = selected.concat(newSelected)
+
     }
+    setSelected(newSelected);
 
   }
+
 
   const selectItem = (id) => {
     const selectedIndex = selected.indexOf(id);
@@ -179,21 +182,31 @@ export default function CustomPaginatedTable({
 
   return (
     <React.Fragment>
-      <div className={flexRootEnd}>
-        <TablePagination
-          rowsPerPageOptions={NUM_ROWS_PER_PAGE_CHOICES}
-          colSpan={3}
-          count={count}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          SelectProps={{
-            inputProps: { "aria-label": "rows per page" },
-            native: true,
-          }}
-          onChangePage={handleChangePage}
-          onChangeRowsPerPage={handleChangeRowsPerPage}
-          ActionsComponent={TablePaginationActions}
-        />
+
+      <div className={flexRoot}>
+        <div className={flexRootStart}>
+          <strong>
+            {selected.length} of {count} selected
+          </strong>
+        </div>
+        <div className={flexRootEnd}>
+          <TablePagination
+            rowsPerPageOptions={NUM_ROWS_PER_PAGE_CHOICES}
+            // colSpan={3}
+            count={count}
+            component="div"
+            
+            rowsPerPage={rowsPerPage}
+            page={page}
+            SelectProps={{
+              inputProps: { "aria-label": "rows per page" },
+              native: true,
+            }}
+            onChangePage={handleChangePage}
+            onChangeRowsPerPage={handleChangeRowsPerPage}
+            ActionsComponent={TablePaginationActions}
+            />
+        </div>
       </div>
       <Paper className={tableContainer} component={Paper}>
         <MaterialTable aria-label="custom pagination table" >
