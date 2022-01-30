@@ -94,7 +94,7 @@ export default function CustomPaginatedTable({
   
 }) {
 
-  const { tableContainer, tableHead, flexRoot, flexRootStart, flexRootEnd } = useTableStyles();
+  const { tableContainer, tableHead, flexRoot, flexRootStart, flexRootEnd, headerCheckbox } = useTableStyles();
   
   const isSelected = (name) => selected.indexOf(name) !== -1;
   const allSelected = () => paginatedData.map(row=>row.id).every(elem => selected.includes(elem));
@@ -215,8 +215,10 @@ export default function CustomPaginatedTable({
               {enableCheckbox &&  
                 <TableCell padding="checkbox">
                   <Checkbox
+                    className={headerCheckbox}
                     checked={allSelected()}
                     onClick={handleSelectAll}
+                    color="secondary"
                   />
                 </TableCell>
               }
