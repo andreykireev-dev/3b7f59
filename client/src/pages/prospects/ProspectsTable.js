@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from 'react';
 import MaterialTable from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableHead from "@material-ui/core/TableHead";
@@ -12,6 +12,13 @@ import KeyboardArrowLeft from "@material-ui/icons/KeyboardArrowLeft";
 import KeyboardArrowRight from "@material-ui/icons/KeyboardArrowRight";
 import LastPageIcon from "@material-ui/icons/LastPage";
 import Checkbox from "@material-ui/core/Checkbox";
+import Button from "@material-ui/core/Button";
+import Box from "@material-ui/core/Box";
+import Modal from "@material-ui/core/Modal";
+import Snackbar from '@material-ui/core/Snackbar';
+import Alert from '@material-ui/lab/Alert';
+
+
 import moment from "moment";
 
 
@@ -19,6 +26,7 @@ import moment from "moment";
 import { Grid, TableCell, Typography } from "@material-ui/core";
 import { NUM_ROWS_PER_PAGE_CHOICES } from "../../constants/table";
 import { useTableStyles } from "../../styles/table";
+import { useModalStyles } from "../../styles/modal";
 
 
 function TablePaginationActions(props) {
@@ -79,6 +87,91 @@ function TablePaginationActions(props) {
   );
 }
 
+
+function AddToCampaignModal({
+  selected
+  
+}) {
+  const [modalState, setModalState] = useState(false);
+  const [snackbarStatus, setSnackbarStatus] = useState(false);
+  const [notification, setNotification] = useState({});
+  const { modalBox, snackbar } = useModalStyles();
+
+
+  const handleModalOpen = () => {
+    if (selected.length > 0) {
+      setModalState(true);
+    } else {
+      setNotification({severity: "warning", message: "Please select Prospects to add."})
+      setSnackbarStatus(true);
+
+    }
+  };
+
+  const handleModalClose = () => {
+    setModalState(false);
+  };
+
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setSnackbarStatus(false);
+  };
+
+
+  const AlertBox = () => {
+    if (notification.severity) {
+      return (
+        <Snackbar 
+          open={snackbarStatus} 
+          autoHideDuration={6000} 
+          onClose={handleSnackbarClose}
+          className={snackbar}
+        >
+          <Alert onClose={handleSnackbarClose} severity={notification.severity}>
+            {notification.message}
+          </Alert>
+        </Snackbar>
+      );
+    } else {
+      return false
+    }
+
+  };
+
+  const body = (
+    <div className={modalBox}>
+      <h2>Select a Campaign to Add {selected.length} Prospect{selected.length > 1 ? "s" : ""}</h2>
+      <p>
+        Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
+      </p>
+    </div>
+  );
+
+  return (
+    <div>
+      <Button
+        variant="outlined"
+        color="primary"
+        size="small"
+        onClick={handleModalOpen}
+      >
+        Add to Campaign
+      </Button>
+      <AlertBox />
+      <Modal
+        open={modalState}
+        onClose={handleModalClose}
+        centered
+      >
+        {body}
+      </Modal>
+    </div>
+  );
+
+}
 
 
 export default function CustomPaginatedTable({
@@ -188,6 +281,10 @@ export default function CustomPaginatedTable({
           <strong>
             {selected.length} of {count} selected
           </strong>
+          <Box pr={2} />
+          <AddToCampaignModal 
+            selected={selected}
+          />
         </div>
         <div className={flexRootEnd}>
           <TablePagination
