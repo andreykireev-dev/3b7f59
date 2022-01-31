@@ -21,12 +21,16 @@ import Alert from '@material-ui/lab/Alert';
 
 import moment from "moment";
 
+import axios from "axios";
 
 
-import { Grid, TableCell, Typography } from "@material-ui/core";
+
+
+import { CircularProgress, Grid, TableCell, TextField, Typography } from "@material-ui/core";
 import { NUM_ROWS_PER_PAGE_CHOICES } from "../../constants/table";
 import { useTableStyles } from "../../styles/table";
 import { useModalStyles } from "../../styles/modal";
+import { Autocomplete } from '@material-ui/lab';
 
 
 function TablePaginationActions(props) {
@@ -89,18 +93,66 @@ function TablePaginationActions(props) {
 
 
 function AddToCampaignModal({
-  selected
+  selected, setSelected
   
 }) {
   const [modalState, setModalState] = useState(false);
   const [snackbarStatus, setSnackbarStatus] = useState(false);
   const [notification, setNotification] = useState({});
   const { modalBox, snackbar } = useModalStyles();
+  
+  const [isDataLoading, setIsDataLoading] = useState(true);
+  const [campaignsData, setCampaignsData] = useState([]);
+  
+  const { flexRoot, flexRootStart, flexRootEnd } = useTableStyles();
+  const [selectedCampaign, setSelectedCampaign] = useState({});
 
+  const addToCampaign = async (prospects) => {
+    setIsDataLoading(true);
+    try {
+      const resp = await axios.post(
+        `/api/campaigns/${selectedCampaign.id}/prospects`, 
+        {prospect_ids: prospects},
+      );
+      let notification = {
+        severity: "success",
+        message: `Added ${resp.data.prospect_ids.length} prospects to ${selectedCampaign.name}.`
+      }
+      if (resp.data.prospect_ids.length < selected.length) {
+        notification.severity = "warning"
+        notification.message += " Some selected prospects already added to the Campaign."
+      }
+      setNotification(notification);
+      setSnackbarStatus(true);
+      setModalState(false);
+      setSelected([]);
+    } catch (error) {
+        console.error(error);
+    } finally {
+        setIsDataLoading(false);
+    }
+  };
+
+
+  const getCampaigns = async () => {
+    setIsDataLoading(true);
+    try {
+      const resp = await axios.get(
+        `/api/campaigns`,
+      );
+      setCampaignsData(resp.data.campaigns);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsDataLoading(false);
+    }
+  };
 
   const handleModalOpen = () => {
     if (selected.length > 0) {
+      setSnackbarStatus(false);
       setModalState(true);
+      getCampaigns();
     } else {
       setNotification({severity: "warning", message: "Please select Prospects to add."})
       setSnackbarStatus(true);
@@ -113,10 +165,6 @@ function AddToCampaignModal({
   };
 
   const handleSnackbarClose = (event, reason) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-
     setSnackbarStatus(false);
   };
 
@@ -141,14 +189,43 @@ function AddToCampaignModal({
 
   };
 
+  const autocomplete = (
+    <Autocomplete
+      options={campaignsData}
+      getOptionLabel={(option) => option.name}
+      style={{ width: 350 }}
+      renderInput={(params) => <TextField {...params} label="Add to Campaign" variant="outlined" />}
+      onChange={(event, newValue) => {setSelectedCampaign(newValue)}}
+    />
+  )
+
   const body = (
     <div className={modalBox}>
       <h2>Select a Campaign to Add {selected.length} Prospect{selected.length > 1 ? "s" : ""}</h2>
-      <p>
-        Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
-      </p>
+      <div className={flexRoot}>
+        <div className={flexRootStart}>
+          {isDataLoading ? (
+            <Grid container justifyContent="center">
+              <CircularProgress />
+            </Grid>
+          ) : (
+            autocomplete
+          )}
+          </div>
+          <div className={flexRootEnd}>
+          <Button
+            variant="contained"
+            color="primary"
+            size="large"
+            onClick={() => addToCampaign(selected)}
+          >
+            Add
+          </Button>
+        </div>
+      </div>
     </div>
   );
+
 
   return (
     <div>
@@ -284,6 +361,7 @@ export default function CustomPaginatedTable({
           <Box pr={2} />
           <AddToCampaignModal 
             selected={selected}
+            setSelected={setSelected}
           />
         </div>
         <div className={flexRootEnd}>
@@ -334,6 +412,7 @@ export default function CustomPaginatedTable({
                         hover
                         key={row.id} 
                         id={row.id}
+                        onClick={(event) => toggleSelection(event, row.id)}
                       >
                         {enableCheckbox &&  
                           <TableCell padding="checkbox">
