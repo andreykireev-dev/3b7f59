@@ -61,4 +61,5 @@ class ApplicationController < ActionController::API
 
     return [offset, page_size]
   end
+  
 end

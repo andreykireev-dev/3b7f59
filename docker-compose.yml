@@ -9,11 +9,12 @@ services:
     - "3000:3000"
     command: tail -f /dev/null
     environment:
-      - DATABASE_URL=postgres://username:password@postgres:5432/dbname
+      - DATABASE_URL_DEV=postgres://username:password@postgres:5432/dbname
+      - DATABASE_URL_TEST=postgres://username:password@postgres:5432/test_dbname
   postgres:
     image: postgres
     volumes:
-      - postgres
+      - postgres:/var/lib/postgresql/data
     environment:
       - POSTGRES_USER=username
       - POSTGRES_PASSWORD=password
