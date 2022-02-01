@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import MaterialTable from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableHead from "@material-ui/core/TableHead";
@@ -101,7 +101,7 @@ function AddToCampaignModal({
   const [notification, setNotification] = useState({});
   const { modalBox, snackbar } = useModalStyles();
   
-  const [isDataLoading, setIsDataLoading] = useState(true);
+  const [isDataLoading, setIsDataLoading] = useState(false);
   const [campaignsData, setCampaignsData] = useState([]);
   
   const { flexRoot, flexRootStart, flexRootEnd } = useTableStyles();
@@ -134,17 +134,20 @@ function AddToCampaignModal({
   };
 
 
-  const getCampaigns = async () => {
-    setIsDataLoading(true);
+  const getCampaigns = async (searchQuery) => {
+    
     try {
       const resp = await axios.get(
-        `/api/campaigns`,
+        `/api/campaigns/search?query=${searchQuery}`,
       );
-      setCampaignsData(resp.data.campaigns);
+      if(resp.data.length > 0) {
+        setCampaignsData(resp.data);
+      } else {
+        setCampaignsData([])
+      }
     } catch (error) {
       console.error(error);
     } finally {
-      setIsDataLoading(false);
     }
   };
 
@@ -152,7 +155,7 @@ function AddToCampaignModal({
     if (selected.length > 0) {
       setSnackbarStatus(false);
       setModalState(true);
-      getCampaigns();
+      // getCampaigns();
     } else {
       setNotification({severity: "warning", message: "Please select Prospects to add."})
       setSnackbarStatus(true);
@@ -167,6 +170,10 @@ function AddToCampaignModal({
   const handleSnackbarClose = (event, reason) => {
     setSnackbarStatus(false);
   };
+
+
+  const [value, setValue] = React.useState(null);
+  const [inputValue, setInputValue] = React.useState('');
 
 
   const AlertBox = () => {
@@ -188,14 +195,31 @@ function AddToCampaignModal({
     }
 
   };
+  
+  useEffect(()=>{
+    
+    if (inputValue === '') {
+      setSelectedCampaign(value ? [value] : []);
+      return undefined;
+    }
+      
+    getCampaigns(inputValue);
+
+  }, [inputValue, value])
 
   const autocomplete = (
     <Autocomplete
       options={campaignsData}
-      getOptionLabel={(option) => option.name}
+      getOptionLabel={(option) => (typeof option === 'string' ? option : option.name)}
       style={{ width: 350 }}
+      loading={isDataLoading}
+      filterOptions={(x) => x}
+      includeInputInList
+      filterSelectedOptions
       renderInput={(params) => <TextField {...params} label="Add to Campaign" variant="outlined" />}
-      onChange={(event, newValue) => {setSelectedCampaign(newValue)}}
+      onChange={(event, newValue) => {setSelectedCampaign(newValue); setValue(newValue);}}
+      onInputChange={(event, newInputValue) => {setInputValue(newInputValue);}}
+      value={value}
     />
   )
 
@@ -251,7 +275,7 @@ function AddToCampaignModal({
 }
 
 
-export default function CustomPaginatedTable({
+export default function ProspectsTable({
   paginatedData,
   count,
   page,
