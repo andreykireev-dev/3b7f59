@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import MaterialTable from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableHead from "@material-ui/core/TableHead";
@@ -15,23 +15,22 @@ import Checkbox from "@material-ui/core/Checkbox";
 import Button from "@material-ui/core/Button";
 import Box from "@material-ui/core/Box";
 import Modal from "@material-ui/core/Modal";
-import Snackbar from '@material-ui/core/Snackbar';
-import Alert from '@material-ui/lab/Alert';
-
-
+import Snackbar from "@material-ui/core/Snackbar";
+import Alert from "@material-ui/lab/Alert";
 import moment from "moment";
-
 import axios from "axios";
 
-
-
-
-import { CircularProgress, Grid, TableCell, TextField, Typography } from "@material-ui/core";
+import {
+  CircularProgress,
+  Grid,
+  TableCell,
+  TextField,
+  Typography,
+} from "@material-ui/core";
 import { NUM_ROWS_PER_PAGE_CHOICES } from "../../constants/table";
 import { useTableStyles } from "../../styles/table";
 import { useModalStyles } from "../../styles/modal";
-import { Autocomplete } from '@material-ui/lab';
-
+import { Autocomplete } from "@material-ui/lab";
 
 function TablePaginationActions(props) {
   const { paginationRoot, paginationIconButton } = useTableStyles();
@@ -91,19 +90,15 @@ function TablePaginationActions(props) {
   );
 }
 
-
-function AddToCampaignModal({
-  selected, setSelected
-  
-}) {
+function AddToCampaignModal({ selected, setSelected }) {
   const [modalState, setModalState] = useState(false);
   const [snackbarStatus, setSnackbarStatus] = useState(false);
   const [notification, setNotification] = useState({});
   const { modalBox, snackbar } = useModalStyles();
-  
+
   const [isDataLoading, setIsDataLoading] = useState(false);
   const [campaignsData, setCampaignsData] = useState([]);
-  
+
   const { flexRoot, flexRootStart, flexRootEnd } = useTableStyles();
   const [selectedCampaign, setSelectedCampaign] = useState({});
 
@@ -111,39 +106,38 @@ function AddToCampaignModal({
     setIsDataLoading(true);
     try {
       const resp = await axios.post(
-        `/api/campaigns/${selectedCampaign.id}/prospects`, 
-        {prospect_ids: prospects},
+        `/api/campaigns/${selectedCampaign.id}/prospects`,
+        { prospect_ids: prospects }
       );
-      let notification = {
+      const notification = {
         severity: "success",
-        message: `Added ${resp.data.prospect_ids.length} prospects to ${selectedCampaign.name}.`
-      }
+        message: `Added ${resp.data.prospect_ids.length} prospects to ${selectedCampaign.name}.`,
+      };
       if (resp.data.prospect_ids.length < selected.length) {
-        notification.severity = "warning"
-        notification.message += " Some selected prospects already added to the Campaign."
+        notification.severity = "warning";
+        notification.message +=
+          " Some selected prospects already added to the Campaign.";
       }
       setNotification(notification);
       setSnackbarStatus(true);
       setModalState(false);
       setSelected([]);
     } catch (error) {
-        console.error(error);
+      console.error(error);
     } finally {
-        setIsDataLoading(false);
+      setIsDataLoading(false);
     }
   };
 
-
   const getCampaigns = async (searchQuery) => {
-    
     try {
       const resp = await axios.get(
-        `/api/campaigns/search?query=${searchQuery}`,
+        `/api/campaigns/search?query=${searchQuery}`
       );
-      if(resp.data.length > 0) {
+      if (resp.data.length > 0) {
         setCampaignsData(resp.data);
       } else {
-        setCampaignsData([])
+        setCampaignsData([]);
       }
     } catch (error) {
       console.error(error);
@@ -155,11 +149,12 @@ function AddToCampaignModal({
     if (selected.length > 0) {
       setSnackbarStatus(false);
       setModalState(true);
-      // getCampaigns();
     } else {
-      setNotification({severity: "warning", message: "Please select Prospects to add."})
+      setNotification({
+        severity: "warning",
+        message: "Please select Prospects to add.",
+      });
       setSnackbarStatus(true);
-
     }
   };
 
@@ -171,17 +166,15 @@ function AddToCampaignModal({
     setSnackbarStatus(false);
   };
 
-
   const [value, setValue] = React.useState(null);
-  const [inputValue, setInputValue] = React.useState('');
-
+  const [inputValue, setInputValue] = React.useState("");
 
   const AlertBox = () => {
     if (notification.severity) {
       return (
-        <Snackbar 
-          open={snackbarStatus} 
-          autoHideDuration={6000} 
+        <Snackbar
+          open={snackbarStatus}
+          autoHideDuration={6000}
           onClose={handleSnackbarClose}
           className={snackbar}
         >
@@ -191,41 +184,50 @@ function AddToCampaignModal({
         </Snackbar>
       );
     } else {
-      return false
+      return false;
     }
-
   };
-  
-  useEffect(()=>{
-    
-    if (inputValue === '') {
+
+  useEffect(() => {
+    if (inputValue === "") {
       setSelectedCampaign(value ? [value] : []);
       return undefined;
     }
-      
-    getCampaigns(inputValue);
 
-  }, [inputValue, value])
+    getCampaigns(inputValue);
+  }, [inputValue, value]);
 
   const autocomplete = (
     <Autocomplete
       options={campaignsData}
-      getOptionLabel={(option) => (typeof option === 'string' ? option : option.name)}
+      getOptionLabel={(option) =>
+        typeof option === "string" ? option : option.name
+      }
       style={{ width: 350 }}
       loading={isDataLoading}
       filterOptions={(x) => x}
       includeInputInList
       filterSelectedOptions
-      renderInput={(params) => <TextField {...params} label="Add to Campaign" variant="outlined" />}
-      onChange={(event, newValue) => {setSelectedCampaign(newValue); setValue(newValue);}}
-      onInputChange={(event, newInputValue) => {setInputValue(newInputValue);}}
+      renderInput={(params) => (
+        <TextField {...params} label="Add to Campaign" variant="outlined" />
+      )}
+      onChange={(event, newValue) => {
+        setSelectedCampaign(newValue);
+        setValue(newValue);
+      }}
+      onInputChange={(event, newInputValue) => {
+        setInputValue(newInputValue);
+      }}
       value={value}
     />
-  )
+  );
 
   const body = (
     <div className={modalBox}>
-      <h2>Select a Campaign to Add {selected.length} Prospect{selected.length > 1 ? "s" : ""}</h2>
+      <h2>
+        Select a Campaign to Add {selected.length} Prospect
+        {selected.length > 1 ? "s" : ""}
+      </h2>
       <div className={flexRoot}>
         <div className={flexRootStart}>
           {isDataLoading ? (
@@ -235,8 +237,8 @@ function AddToCampaignModal({
           ) : (
             autocomplete
           )}
-          </div>
-          <div className={flexRootEnd}>
+        </div>
+        <div className={flexRootEnd}>
           <Button
             variant="contained"
             color="primary"
@@ -250,7 +252,6 @@ function AddToCampaignModal({
     </div>
   );
 
-
   return (
     <div>
       <Button
@@ -262,18 +263,12 @@ function AddToCampaignModal({
         Add to Campaign
       </Button>
       <AlertBox />
-      <Modal
-        open={modalState}
-        onClose={handleModalClose}
-        centered
-      >
+      <Modal open={modalState} onClose={handleModalClose} centered>
         {body}
       </Modal>
     </div>
   );
-
 }
-
 
 export default function ProspectsTable({
   paginatedData,
@@ -283,15 +278,22 @@ export default function ProspectsTable({
   headerColumns,
   handleChangePage,
   handleChangeRowsPerPage,
-  selected, setSelected,
-  enableCheckbox
-  
+  selected,
+  setSelected,
+  enableCheckbox,
 }) {
+  const {
+    tableContainer,
+    tableHead,
+    flexRoot,
+    flexRootStart,
+    flexRootEnd,
+    headerCheckbox,
+  } = useTableStyles();
 
-  const { tableContainer, tableHead, flexRoot, flexRootStart, flexRootEnd, headerCheckbox } = useTableStyles();
-  
   const isSelected = (name) => selected.indexOf(name) !== -1;
-  const allSelected = () => paginatedData.map(row=>row.id).every(elem => selected.includes(elem));
+  const allSelected = () =>
+    paginatedData.map((row) => row.id).every((elem) => selected.includes(elem));
 
   const handleSelectAll = () => {
     let newSelected = [];
@@ -300,28 +302,29 @@ export default function ProspectsTable({
       // unselect all
       newSelected = [...selected];
 
-      paginatedData.map(row=>row.id).forEach(id => {
-        const index = newSelected.indexOf(id);
-        if (index > -1) {
-          newSelected.splice(index,1);
-        }
-      });
+      paginatedData
+        .map((row) => row.id)
+        .forEach((id) => {
+          const index = newSelected.indexOf(id);
+          if (index > -1) {
+            newSelected.splice(index, 1);
+          }
+        });
       setSelected(newSelected);
     } else {
       // select all
-      paginatedData.map(row=>row.id).forEach(id => {
-        const index = selected.indexOf(id);
-        if (index === -1) {
-          newSelected = newSelected.concat(id)
-        }
-      });
-      newSelected = selected.concat(newSelected)
-
+      paginatedData
+        .map((row) => row.id)
+        .forEach((id) => {
+          const index = selected.indexOf(id);
+          if (index === -1) {
+            newSelected = newSelected.concat(id);
+          }
+        });
+      newSelected = selected.concat(newSelected);
     }
     setSelected(newSelected);
-
-  }
-
+  };
 
   const selectItem = (id) => {
     const selectedIndex = selected.indexOf(id);
@@ -329,7 +332,7 @@ export default function ProspectsTable({
 
     if (selectedIndex === -1) {
       newSelected = newSelected.concat(selected, id);
-    } 
+    }
 
     setSelected(newSelected);
   };
@@ -345,14 +348,13 @@ export default function ProspectsTable({
     } else if (selectedIndex > 0) {
       newSelected = newSelected.concat(
         selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1),
+        selected.slice(selectedIndex + 1)
       );
     }
 
     setSelected(newSelected);
   };
 
-  
   const toggleSelection = (event, id) => {
     const selectedIndex = selected.indexOf(id);
 
@@ -362,7 +364,6 @@ export default function ProspectsTable({
       unselectItem(id);
     }
   };
-  
 
   if (paginatedData.length === 0) {
     return (
@@ -376,25 +377,19 @@ export default function ProspectsTable({
 
   return (
     <React.Fragment>
-
       <div className={flexRoot}>
         <div className={flexRootStart}>
           <strong>
             {selected.length} of {count} selected
           </strong>
           <Box pr={2} />
-          <AddToCampaignModal 
-            selected={selected}
-            setSelected={setSelected}
-          />
+          <AddToCampaignModal selected={selected} setSelected={setSelected} />
         </div>
         <div className={flexRootEnd}>
           <TablePagination
             rowsPerPageOptions={NUM_ROWS_PER_PAGE_CHOICES}
-            // colSpan={3}
             count={count}
             component="div"
-            
             rowsPerPage={rowsPerPage}
             page={page}
             SelectProps={{
@@ -404,14 +399,14 @@ export default function ProspectsTable({
             onChangePage={handleChangePage}
             onChangeRowsPerPage={handleChangeRowsPerPage}
             ActionsComponent={TablePaginationActions}
-            />
+          />
         </div>
       </div>
       <Paper className={tableContainer} component={Paper}>
-        <MaterialTable aria-label="custom pagination table" >
+        <MaterialTable aria-label="custom pagination table">
           <TableHead className={tableHead}>
             <TableRow>
-              {enableCheckbox &&  
+              {enableCheckbox && (
                 <TableCell padding="checkbox">
                   <Checkbox
                     className={headerCheckbox}
@@ -420,7 +415,7 @@ export default function ProspectsTable({
                     color="secondary"
                   />
                 </TableCell>
-              }
+              )}
               {headerColumns.map((col, index) => (
                 <React.Fragment key={index}>
                   <TableCell variant="head">{col}</TableCell>
@@ -428,39 +423,39 @@ export default function ProspectsTable({
               ))}
             </TableRow>
           </TableHead>
-          <TableBody>{
-                paginatedData.map((row) => {
-
-                  return (
-                      <TableRow 
-                        hover
-                        key={row.id} 
-                        id={row.id}
+          <TableBody>
+            {paginatedData.map((row) => {
+              return (
+                <TableRow
+                  hover
+                  key={row.id}
+                  id={row.id}
+                  onClick={(event) => toggleSelection(event, row.id)}
+                >
+                  {enableCheckbox && (
+                    <TableCell padding="checkbox">
+                      <Checkbox
+                        id={`checkbox-${row.id}`}
+                        name={`checkbox-${row.id}`}
+                        color="primary"
+                        checked={isSelected(row.id)}
                         onClick={(event) => toggleSelection(event, row.id)}
-                      >
-                        {enableCheckbox &&  
-                          <TableCell padding="checkbox">
-                            <Checkbox 
-                              id={`checkbox-${row.id}`}
-                              name={`checkbox-${row.id}`}
-                              color="primary"
-                              checked={isSelected(row.id)}
-                              onClick={(event) => toggleSelection(event, row.id)}
-                            />
-                          </TableCell>
-                        }
-                        {[row.email, 
-                          row.first_name,
-                          row.last_name,
-                          moment(row.created_at).format("MMM d"),
-                          moment(row.updated_at).format("MMM d"),
-                        ].map((col) => (
-                          <TableCell>{col}</TableCell>
-                        ))}
-                      </TableRow>
-                  );
-                })
-          }</TableBody>
+                      />
+                    </TableCell>
+                  )}
+                  {[
+                    row.email,
+                    row.first_name,
+                    row.last_name,
+                    moment(row.created_at).format("MMM d"),
+                    moment(row.updated_at).format("MMM d"),
+                  ].map((col) => (
+                    <TableCell>{col}</TableCell>
+                  ))}
+                </TableRow>
+              );
+            })}
+          </TableBody>
           <TableFooter>
             <TableRow></TableRow>
           </TableFooter>
