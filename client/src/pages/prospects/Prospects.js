@@ -22,31 +22,6 @@ const Prospects = () => {
     setCurrentPage(index);
   };
 
-  const handleOnSelect = (target) => {
-    const id = target.id
-    alert(id);
-    alert("hi");
-    const selectedIndex = selected.indexOf(id);
-    let newSelected = [];
-
-    if (selectedIndex === -1) {
-      // nothing is selected
-      newSelected = newSelected.concat(selected, id);
-    } else if (selectedIndex === 0) {
-      // first
-      newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-      // last
-      newSelected = newSelected.concat(selected.slice(0, -1));
-    } else if (selectedIndex > 0) {
-      // in between
-      newSelected = newSelected.concat(
-        selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1),
-      );
-    }
-    setSelected(newSelected);
-  }
 
   useEffect(() => {
     const fetchProspects = async () => {
@@ -80,7 +55,8 @@ const Prospects = () => {
             rowsPerPage={rowsPerPage}
             handleChangePage={handleChangePage}
             handleChangeRowsPerPage={handleChangeRowsPerPage}
-            handleOnSelect={handleOnSelect}
+            selected={selected}
+            setSelected={setSelected}
           />
         }
       />

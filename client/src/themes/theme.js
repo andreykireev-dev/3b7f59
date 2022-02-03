@@ -27,7 +27,7 @@ export const theme = createTheme({
   palette: {
     // Main app colors
     primary: { main: "#4fbe75" },
-    secondary: { main: "#FFFFFF" },
+    secondary: { main: "#FFFFFF"},
     contrastThreshold: 2,
     background: {
       default: "#f4f6fc", //background body

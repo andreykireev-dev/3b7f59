@@ -41,6 +41,11 @@ export const useTableStyles = makeStyles((theme) => ({
     alignItems: "center",
     justifyContent: "space-between",
   },
+  flexRootStart: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "flex-start",
+  },
   flexRootEnd: {
     display: "flex",
     alignItems: "center",
@@ -49,4 +54,7 @@ export const useTableStyles = makeStyles((theme) => ({
   flexEnd: {
     alignSelf: "flex-end",
   },
+  headerCheckbox: {
+    color: theme.palette.secondary.light,
+  }
 }));
